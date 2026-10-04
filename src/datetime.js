@@ -243,6 +243,7 @@ function toISOTime(
   suppressMilliseconds,
   includeOffset,
   extendedZone,
+  disallowZ,
   precision
 ) {
   let showSeconds = !suppressSeconds || o.c.millisecond !== 0 || o.c.second !== 0,
@@ -278,7 +279,7 @@ function toISOTime(
   }
 
   if (includeOffset) {
-    if (o.isOffsetFixed && o.offset === 0 && !extendedZone) {
+    if (o.isOffsetFixed && o.offset === 0 && !extendedZone && !disallowZ) {
       c += "Z";
     } else if (o.o < 0) {
       c += "-";
@@ -1884,6 +1885,7 @@ export default class DateTime {
    * @param {boolean} [opts.suppressSeconds=false] - exclude seconds from the format if they're 0
    * @param {boolean} [opts.includeOffset=true] - include the offset, such as 'Z' or '-04:00'
    * @param {boolean} [opts.extendedZone=false] - add the time zone format extension
+   * @param {boolean} [opts.disallowZ=false] - use a numeric offset instead of 'Z' for UTC
    * @param {string} [opts.format='extended'] - choose between the basic and extended format
    * @param {string} [opts.precision='milliseconds'] - truncate output to desired presicion: 'years', 'months', 'days', 'hours', 'minutes', 'seconds' or 'milliseconds'. When precision and suppressSeconds or suppressMilliseconds are used together, precision sets the maximum unit shown in the output, however seconds or milliseconds will still be suppressed if they are 0.
    * @example DateTime.utc(1983, 5, 25).toISO() //=> '1982-05-25T00:00:00.000Z'
@@ -1892,6 +1894,7 @@ export default class DateTime {
    * @example DateTime.now().toISO({ format: 'basic' }) //=> '20170422T204705.335-0400'
    * @example DateTime.now().toISO({ precision: 'day' }) //=> '2017-04-22Z'
    * @example DateTime.now().toISO({ precision: 'minute' }) //=> '2017-04-22T20:47Z'
+   * @example DateTime.utc(1982, 5, 25, 9, 23, 54, 123).toISO({ disallowZ: true }) //=> '1982-05-25T09:23:54.123+00:00'
    * @return {string|null}
    */
   toISO({
@@ -1900,6 +1903,7 @@ export default class DateTime {
     suppressMilliseconds = false,
     includeOffset = true,
     extendedZone = false,
+    disallowZ = false,
     precision = "milliseconds",
   } = {}) {
     if (!this.isValid) {
@@ -1918,6 +1922,7 @@ export default class DateTime {
       suppressMilliseconds,
       includeOffset,
       extendedZone,
+      disallowZ,
       precision
     );
     return c;
@@ -1955,7 +1960,8 @@ export default class DateTime {
    * @param {boolean} [opts.suppressMilliseconds=false] - exclude milliseconds from the format if they're 0
    * @param {boolean} [opts.suppressSeconds=false] - exclude seconds from the format if they're 0
    * @param {boolean} [opts.includeOffset=true] - include the offset, such as 'Z' or '-04:00'
-   * @param {boolean} [opts.extendedZone=true] - add the time zone format extension
+   * @param {boolean} [opts.extendedZone=false] - add the time zone format extension
+   * @param {boolean} [opts.disallowZ=false] - use a numeric offset instead of 'Z' for UTC
    * @param {boolean} [opts.includePrefix=false] - include the `T` prefix
    * @param {string} [opts.format='extended'] - choose between the basic and extended format
    * @param {string} [opts.precision='milliseconds'] - truncate output to desired presicion: 'hours', 'minutes', 'seconds' or 'milliseconds'. When precision and suppressSeconds or suppressMilliseconds are used together, precision sets the maximum unit shown in the output, however seconds or milliseconds will still be suppressed if they are 0.
@@ -1963,6 +1969,7 @@ export default class DateTime {
    * @example DateTime.utc().set({ hour: 7, minute: 34, seconds: 0, milliseconds: 0 }).toISOTime({ suppressSeconds: true }) //=> '07:34Z'
    * @example DateTime.utc().set({ hour: 7, minute: 34 }).toISOTime({ format: 'basic' }) //=> '073419.361Z'
    * @example DateTime.utc().set({ hour: 7, minute: 34 }).toISOTime({ includePrefix: true }) //=> 'T07:34:19.361Z'
+   * @example DateTime.utc(1982, 5, 25, 9, 23, 54, 123).toISOTime({ disallowZ: true }) //=> '09:23:54.123+00:00'
    * @example DateTime.utc().set({ hour: 7, minute: 34, second: 56 }).toISOTime({ precision: 'minute' }) //=> '07:34Z'
    * @return {string}
    */
@@ -1972,6 +1979,7 @@ export default class DateTime {
     includeOffset = true,
     includePrefix = false,
     extendedZone = false,
+    disallowZ = false,
     format = "extended",
     precision = "milliseconds",
   } = {}) {
@@ -1990,6 +1998,7 @@ export default class DateTime {
         suppressMilliseconds,
         includeOffset,
         extendedZone,
+        disallowZ,
         precision
       )
     );

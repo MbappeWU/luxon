@@ -79,6 +79,17 @@ test("DateTime#toISO() shows 'Z' for UTC", () => {
   expect(dt.toISO()).toBe("1982-05-25T09:23:54.123Z");
 });
 
+test("DateTime#toISO() can disallow Z for fixed UTC", () => {
+  expect(dt.toISO({ disallowZ: true })).toBe("1982-05-25T09:23:54.123+00:00");
+  expect(dt.toISO({ disallowZ: true, format: "basic" })).toBe("19820525T092354.123+0000");
+  expect(dt.toISO({ disallowZ: true, precision: "day" })).toBe("1982-05-25+00:00");
+  expect(dt.toISO({ disallowZ: true, includeOffset: false })).toBe("1982-05-25T09:23:54.123");
+  expect(dt.toISO({ disallowZ: true, extendedZone: true })).toBe(
+    "1982-05-25T09:23:54.123+00:00[Etc/UTC]"
+  );
+  expect(invalid.toISO({ disallowZ: true })).toBe(null);
+});
+
 test("DateTime#toISO() shows the offset, unless explicitly asked", () => {
   const offsetted = dt.toUTC(-6 * 60);
   expect(offsetted.toISO()).toBe("1982-05-25T03:23:54.123-06:00");
@@ -246,6 +257,15 @@ test("DateTime#toISOTime() returns an ISO 8601 date", () => {
   expect(dt.toISOTime()).toBe("09:23:54.123Z");
 });
 
+test("DateTime#toISOTime() can disallow Z for fixed UTC", () => {
+  expect(dt.toISOTime({ disallowZ: true })).toBe("09:23:54.123+00:00");
+  expect(dt.toISOTime({ disallowZ: true, format: "basic" })).toBe("092354.123+0000");
+  expect(dt.toISOTime({ disallowZ: true, includePrefix: true })).toBe("T09:23:54.123+00:00");
+  expect(dt.toISOTime({ disallowZ: true, includeOffset: false })).toBe("09:23:54.123");
+  expect(dt.toISOTime({ disallowZ: true, extendedZone: true })).toBe("09:23:54.123+00:00[Etc/UTC]");
+  expect(invalid.toISOTime({ disallowZ: true })).toBe(null);
+});
+
 test("DateTime#toISOTime() won't suppress seconds by default", () => {
   expect(dt.startOf("minute").toISOTime()).toBe("09:23:00.000Z");
 });
@@ -272,6 +292,10 @@ test("DateTime#toISOTime({suppressSeconds: true}) will suppress milliseconds if 
 
 test("DateTime#toISOTime() handles other offsets", () => {
   expect(dt.setZone("America/New_York").toISOTime()).toBe("05:23:54.123-04:00");
+  expect(dt.setZone("America/New_York").toISOTime({ disallowZ: true })).toBe("05:23:54.123-04:00");
+  expect(dt.toUTC(6 * 60).toISOTime({ disallowZ: true })).toBe("15:23:54.123+06:00");
+  expect(dt.toUTC(-6 * 60).toISOTime({ disallowZ: true })).toBe("03:23:54.123-06:00");
+  expect(dt.setZone("Africa/Abidjan").toISOTime({ disallowZ: true })).toBe("09:23:54.123+00:00");
 });
 
 test("DateTime#toISOTime() can omit the offset", () => {
